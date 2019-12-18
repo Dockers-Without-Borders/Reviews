@@ -1,5 +1,5 @@
 const faker = require('faker');
-const mysql = require('mysql');
+const {Pool, Client} = require('pg');
 const restaurantsList = require('./restaurantList.js');
 const restaurants = restaurantsList.restaurants;
 const numUsers = 100;
@@ -8,14 +8,12 @@ const numRestaurants = restaurants.length;
 const foodPics = 'https://yelpfoodpics.s3-us-west-1.amazonaws.com/';
 
 
-const connection = mysql.createConnection({
-  host: 'database',
-  user: 'user',
-  password: 'user',
-  database: 'yelpreviews'
+const connection = new Pool({
+  user: 'postgres',
+  password: 'AKK',
+  database: 'yelpreviews',
+  port: 5432
 });
-
-connection.connect();
 
 let db = {
 

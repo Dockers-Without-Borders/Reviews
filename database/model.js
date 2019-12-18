@@ -1,10 +1,10 @@
-const mysql = require('mysql');
+const { Pool, Client} = require('pg');
 
-const connection = mysql.createConnection({
-  host: 'database',
-  user: 'user',
-  password: 'user',
-  database: 'yelpreviews'
+const connection = new Pool({
+  user: 'postgres',
+  password: 'AKK',
+  database: 'yelpreviews',
+  port: 5432
 });
 
 connection.connect();

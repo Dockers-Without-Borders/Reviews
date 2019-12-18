@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "jest --coverage --colors",
-    "start": "node ./server/index.js",
+    "start": "nodemon ./server/index.js",
     "seed": "node ./database/seeding.js",
     "build": "webpack -w -d",
     "build:prod": "webpack --mode=production"
@@ -59,6 +59,7 @@
     "mysql": "^2.17.1",
     "nodemon": "^2.0.1",
     "path": "^0.12.7",
+    "pg": "^7.15.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
   }
