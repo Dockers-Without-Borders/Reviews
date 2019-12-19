@@ -13,14 +13,17 @@ npm install
 ## API
 
 ### Create
-```Javascript
-Post request to '/restaurantReview'
-```
+ - Add a review to the list of reviews
+   - **POST /restaurantReview**
+
+ - In request body provide key/value pairs: 
+   - username: [String]
+   - text: [String]
+   - photo-urls [String, String, ...]
 
 ### Read
-```Javascript
-Post request to '/restaurantReview'
-```
+ - Get the list of reviews for a restaurant
+   - **GET /restaurantReviews**
 
 ### Update
 ```Javascript

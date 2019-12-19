@@ -8,7 +8,7 @@ const numRestaurants = restaurants.length;
 const foodPics = 'https://yelpfoodpics.s3-us-west-1.amazonaws.com/';
 
 
-const connection = new Pool({
+const pool = new Pool({
   user: 'postgres',
   password: 'AKK',
   database: 'yelpreviews',
@@ -19,12 +19,13 @@ let db = {
 
   querySQL: function(query) {
     let result = new Promise((resolve, reject) => {
-      connection.query(query, function(err, data) {
+      pool.query(query, function(err, resp) {
         if(err) {
-          console.log('query', query)
+          console.log(query);
+          console.log('query failed: ', err)
           reject('query error', err);
         } else {
-          resolve(data);
+          resolve(resp);
         }
       })
     });
@@ -62,11 +63,12 @@ let db = {
         elite = 1;
       }
       if(i === numUsers - 1) {
-        query += `("${name}", "${location}", ${friends}, ${elite}, '${picture}');`;
+        query += `('${name}', '${location}', ${friends}, ${elite}, '${picture}');`;
       } else {
-        query += `("${name}", "${location}", ${friends}, ${elite}, '${picture}'),`;
+        query += `('${name}', '${location}', ${friends}, ${elite}, '${picture}'),`;
       }
     }
+    console.log(query);
     return await db.querySQL(query);
   },
 
@@ -103,12 +105,18 @@ let db = {
         await db.querySQL(updateUserQuery);
       }
     }
-    connection.end();
+    pool.end();
   }
 }
 
 
 db.seedUsers()
-.then(() => db.seedRestaurants())
-.then(() => db.seedReviews())
+.catch(err => { console.log('error after seed users')})
+.then(() => {
+  console.log('success on users');
+  db.seedRestaurants()})
+.catch(err => { console.log('error after seed Rest')})
+.then(() => {
+  console.log('success on restaurants')
+  db.seedReviews()})
 .catch(err => {console.log('seeding err', err)});
