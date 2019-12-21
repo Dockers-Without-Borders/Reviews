@@ -1,13 +1,15 @@
-CREATE keyspace YelpReviews
+DROP TABLE IF EXISTS yelpreviews.restReviews ;
+DROP TABLE IF EXISTS yelpreviews.users ;
+DROP KEYSPACE IF EXISTS yelpreviews;
+
+CREATE KEYSPACE IF NOT EXISTS yelpreviews
   with replication = {
-    'class': 'SampleStrategy',
+    'class': 'SimpleStrategy',
     'replication_factor': 3
   };
 
-use YelpReviews;
-
-CREATE TABLE restReviews (
-  restname varchar PRIMARY KEY,
+CREATE TABLE yelpreviews.restReviews (
+  restname varchar,
   reviewtext varchar,
   stars int,
   useful int,
@@ -21,7 +23,7 @@ CREATE TABLE restReviews (
   PRIMARY KEY (restname, user_id)
 );
 
-CREATE TABLE users (
+CREATE TABLE yelpreviews.users (
   user_id varchar PRIMARY KEY,
   location varchar,
   friends int,

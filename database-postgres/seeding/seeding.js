@@ -8,8 +8,7 @@ const maxIntents = 4000;
 const maxphotosPerReview = 3;
 const numUsers = 1000000;
 const numRestaurants = 1000000; // leave equal to num users otherwise might break some function below
-const numReviews = 10000000;
-const reviewsPerRest = numReviews/ numRestaurants;
+const numReviews = 1000000;
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 const pool = new Pool({
@@ -25,7 +24,7 @@ const writeToCsv = (header, records, filename) => {
     header: header
   });
   console.log(`Writing ${filename}`);
-  return csvWriter.writeRecords(records);
+  return csvWriter.writeRecords(records)       // returns a promise
 }
 
 let db = {
@@ -132,7 +131,7 @@ let db = {
 }
 let startAll = Date.now();
 let startUser = Date.now();
-let startRestaurants, startReviews, startPhotos, startForeignKeys;
+let startRestaurants, startReviews, startPhotos;
 db.seedUsers()
   .then(() => {
     console.log('users csv written');
@@ -154,16 +153,52 @@ db.seedUsers()
     startPhotos = ((Date.now() - startPhotos) / 1000 / 60).toFixed(4);
     const used = process.memoryUsage();
     console.log('Memory:', used);
-    console.log('Time to Seed Users:', startUser);
-    console.log('Time to Seed Restaurants:', startRestaurants);
-    console.log('Time to Seed Reviews:', startReviews);
-    console.log('Time to Seed Photos:', startPhotos);
-    console.log('Time to Seed All:', ((Date.now() - startAll) / 1000 / 60).toFixed(4));
-    return db.querySQL(`\copy users(name,location,friends,elite,picture) FROM '${path.resolve(__dirname, 'csv/users.csv')}' DELIMITER ',' CSV HEADER;`, 'Users seeded'); })
-  .then(() => db.querySQL(`\copy restaurants(restname) FROM '${path.resolve(__dirname, 'csv/restaurants.csv')}' DELIMITER ',' CSV HEADER;`, 'Restaurants seeded'))
-  .then(() => db.querySQL(`\copy reviews(date, review, stars) FROM '${path.resolve(__dirname, 'csv/reviews.csv')}' DELIMITER ',' CSV HEADER;`, 'Reviews seeded'))
-  .then(() => db.querySQL(`\copy photos(photo, photocaption) FROM '${path.resolve(__dirname, 'csv/photos.csv')}' DELIMITER ',' CSV HEADER;`, 'Photos seeded')) 
+    console.log('Time to build CSV for Users:', startUser);
+    console.log('Time to build CSV for Restaurants:', startRestaurants);
+    console.log('Time to build CSV for Reviews:', startReviews);
+    console.log('Time to build CSV for Photos:', startPhotos);
+    console.log('Time to build CSV for All:', ((Date.now() - startAll) / 1000 / 60).toFixed(4));
+    })
+  .then(() => {
+    console.log('Comencing Database Seeding with CSV\'s');
+    let queryBin = [];
+    startPhotos = Date.now();
+    for (let i = 0; i < 10; i++) {
+      queryBin.push(db.querySQL(`\copy users(name,location,friends,elite,picture) FROM '${path.resolve(__dirname, 'csv/users.csv')}' DELIMITER ',' CSV HEADER;`, `Users seeded ${i+1}mil`));
+    }
+    return Promise.all(queryBin);
+  })
+  .then(() => {
+    console.log(`Users seeded to Database in ${((Date.now() - startPhotos) / 1000 / 60).toFixed(4)}min`);
+    startRestaurants = Date.now();
+    let queryBin = [];
+    for (let i = 0; i < 10; i++) {
+      queryBin.push(db.querySQL(`\copy restaurants(restname) FROM '${path.resolve(__dirname, 'csv/restaurants.csv')}' DELIMITER ',' CSV HEADER;`, `Restaurants seeded ${i+1}mil`));
+    }
+    return Promise.all(queryBin);
+  })
+  .then(() => {
+    console.log(`Users seeded to Database in ${((Date.now() - startRestaurants) / 1000 / 60).toFixed(4)}min`);
+    startReviews = Date.now();
+    let queryBin = [];
+    for (let i = 0; i < 100; i++) {
+      queryBin.push(db.querySQL(`\copy reviews(date, review, stars) FROM '${path.resolve(__dirname, 'csv/reviews.csv')}' DELIMITER ',' CSV HEADER;`, `Reviews seeded ${i+1}mil`));
+    }
+    return Promise.all(queryBin);
+  })
+  .then(() => {
+    console.log(`Users seeded to Database in ${((Date.now() - startReviews) / 1000 / 60).toFixed(4)}min`);
+    startPhotos = Date.now();
+    let queryBin = [];
+    for (let i = 0; i < 10; i++) {
+      queryBin.push(db.querySQL(`\copy photos(photo, photocaption) FROM '${path.resolve(__dirname, 'csv/photos.csv')}' DELIMITER ',' CSV HEADER;`, `Photos seeded ${i+1}mil`));
+    }
+    return Promise.all(queryBin);
+  }) 
   .then(() => { 
+    console.log(`Users seeded to Database in ${((Date.now() - startPhotos) / 1000 / 60).toFixed(4)}min`);
+    console.log(`Total time for csv and seeding: ${((Date.now() - startAll) / 1000 / 60).toFixed(4)}min`);
+
     pool.end(); })
   .catch((err) => {
     console.log('err', err); });

@@ -1,22 +1,40 @@
 const faker = require('faker');
 const path = require('path');
-const { Pool, Client } = require('pg');
-const restaurantsList = require('../restaurantList.js');
-const photosList = require('../photosList.js');
+const restaurantsList = require('../restaurantList.js.js');
+const photosList = require('../photosList.js.js');
 const restaurants = restaurantsList.restaurants;
-const maxIntents = 4000;
 const maxphotosPerReview = 3;
-const numUsers = 1000000;
-const numRestaurants = 1000000; // leave equal to num users otherwise might break some function below
-const numReviews = 1000000;
+const numUsers = 2;
+const numRestaurants = 2; // leave equal to num users otherwise might break some function below
+const numReviews = 2;
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
-const pool = new Pool({
-  user: 'postgres',
-  password: 'AKK',
-  database: 'yelpreviews',
-  port: 5432
-});
+const assert = require('assert');
+const cassandra = require('cassandra-driver'); 
+const authProvider = new cassandra.auth.PlainTextAuthProvider('root', 'AKK');
+const contactPoints = ['127.0.0.1:9042'];
+const keyspace = 'yelpreviews';
+const client = new cassandra.Client({contactPoints: contactPoints, authProvider: authProvider, keyspace: keyspace});
+
+//Ensure all queries are executed before exit
+function execute(query, params, callback) {
+  return new Promise((resolve, reject) => {
+    client.execute(query, params, (err, result) => {
+      if(err) {
+        reject()
+      } else {
+        callback(err, result);
+        resolve()
+      }
+    });
+  });
+}
+
+
+//Execute the queries 
+var query = `INSERT INTO ${keyspace}.`;
+var q1 = execute(query, ['oranges'], (err, result) => { assert.ifError(err); console.log('The cost per orange is $' + result.rows[0].price_p_item)});
+
 
 const writeToCsv = (header, records, filename) => {
   let csvWriter = createCsvWriter({
@@ -24,7 +42,7 @@ const writeToCsv = (header, records, filename) => {
     header: header
   });
   console.log(`Writing ${filename}`);
-  return csvWriter.writeRecords(records)       // returns a promise
+  return csvWriter.writeRecords(records);
 }
 
 let db = {
@@ -131,7 +149,7 @@ let db = {
 }
 let startAll = Date.now();
 let startUser = Date.now();
-let startRestaurants, startReviews, startPhotos;
+let startRestaurants, startReviews, startPhotos, startForeignKeys;
 db.seedUsers()
   .then(() => {
     console.log('users csv written');
@@ -158,16 +176,9 @@ db.seedUsers()
     console.log('Time to Seed Reviews:', startReviews);
     console.log('Time to Seed Photos:', startPhotos);
     console.log('Time to Seed All:', ((Date.now() - startAll) / 1000 / 60).toFixed(4));
-    })
-  .then(() => db.querySQL(`\copy users(name,location,friends,elite,picture) FROM '${path.resolve(__dirname, 'csv/users.csv')}' DELIMITER ',' CSV HEADER;`, 'Users seeded'))
+    return db.querySQL(`\copy users(name,location,friends,elite,picture) FROM '${path.resolve(__dirname, 'csv/users.csv')}' DELIMITER ',' CSV HEADER;`, 'Users seeded'); })
   .then(() => db.querySQL(`\copy restaurants(restname) FROM '${path.resolve(__dirname, 'csv/restaurants.csv')}' DELIMITER ',' CSV HEADER;`, 'Restaurants seeded'))
-  .then(() => {
-    let queryBin = [];
-    for (let i = 0; i < 10; i++) {
-      queryBin.push(db.querySQL(`\copy reviews(date, review, stars) FROM '${path.resolve(__dirname, 'csv/reviews.csv')}' DELIMITER ',' CSV HEADER;`, 'Reviews seeded'));
-    }
-    return Promise.all(queryBin);
-  })
+  .then(() => db.querySQL(`\copy reviews(date, review, stars) FROM '${path.resolve(__dirname, 'csv/reviews.csv')}' DELIMITER ',' CSV HEADER;`, 'Reviews seeded'))
   .then(() => db.querySQL(`\copy photos(photo, photocaption) FROM '${path.resolve(__dirname, 'csv/photos.csv')}' DELIMITER ',' CSV HEADER;`, 'Photos seeded')) 
   .then(() => { 
     pool.end(); })
