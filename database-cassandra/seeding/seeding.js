@@ -9,7 +9,6 @@ const numRestaurants = 2; // leave equal to num users otherwise might break some
 const numReviews = 2;
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
-const assert = require('assert');
 const cassandra = require('cassandra-driver'); 
 const authProvider = new cassandra.auth.PlainTextAuthProvider('root', 'AKK');
 const contactPoints = ['127.0.0.1:9042'];
@@ -17,23 +16,6 @@ const keyspace = 'yelpreviews';
 const client = new cassandra.Client({contactPoints: contactPoints, authProvider: authProvider, keyspace: keyspace});
 
 //Ensure all queries are executed before exit
-function execute(query, params, callback) {
-  return new Promise((resolve, reject) => {
-    client.execute(query, params, (err, result) => {
-      if(err) {
-        reject()
-      } else {
-        callback(err, result);
-        resolve()
-      }
-    });
-  });
-}
-
-
-//Execute the queries 
-var query = `INSERT INTO ${keyspace}.`;
-var q1 = execute(query, ['oranges'], (err, result) => { assert.ifError(err); console.log('The cost per orange is $' + result.rows[0].price_p_item)});
 
 
 const writeToCsv = (header, records, filename) => {
@@ -46,9 +28,20 @@ const writeToCsv = (header, records, filename) => {
 }
 
 let db = {
-
+  execute: function execute(query, params, callback) {
+    return new Promise((resolve, reject) => {
+      client.execute(query, params, (err, result) => {
+        if(err) {
+          reject()
+        } else {
+          callback(err, result);
+          resolve()
+        }
+      });
+    });
+  },
   querySQL: function (query, successLog = 'Success') {
-    let result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       pool.query(query, function (err, resp) {
         if (err) {
           // console.log(query);
@@ -60,7 +53,6 @@ let db = {
         }
       })
     });
-    return result;
   },
 
   seedRestaurants: async function () {
@@ -149,7 +141,7 @@ let db = {
 }
 let startAll = Date.now();
 let startUser = Date.now();
-let startRestaurants, startReviews, startPhotos, startForeignKeys;
+let startRestaurants, startReviews, startPhotos;
 db.seedUsers()
   .then(() => {
     console.log('users csv written');
@@ -171,16 +163,52 @@ db.seedUsers()
     startPhotos = ((Date.now() - startPhotos) / 1000 / 60).toFixed(4);
     const used = process.memoryUsage();
     console.log('Memory:', used);
-    console.log('Time to Seed Users:', startUser);
-    console.log('Time to Seed Restaurants:', startRestaurants);
-    console.log('Time to Seed Reviews:', startReviews);
-    console.log('Time to Seed Photos:', startPhotos);
-    console.log('Time to Seed All:', ((Date.now() - startAll) / 1000 / 60).toFixed(4));
-    return db.querySQL(`\copy users(name,location,friends,elite,picture) FROM '${path.resolve(__dirname, 'csv/users.csv')}' DELIMITER ',' CSV HEADER;`, 'Users seeded'); })
-  .then(() => db.querySQL(`\copy restaurants(restname) FROM '${path.resolve(__dirname, 'csv/restaurants.csv')}' DELIMITER ',' CSV HEADER;`, 'Restaurants seeded'))
-  .then(() => db.querySQL(`\copy reviews(date, review, stars) FROM '${path.resolve(__dirname, 'csv/reviews.csv')}' DELIMITER ',' CSV HEADER;`, 'Reviews seeded'))
-  .then(() => db.querySQL(`\copy photos(photo, photocaption) FROM '${path.resolve(__dirname, 'csv/photos.csv')}' DELIMITER ',' CSV HEADER;`, 'Photos seeded')) 
+    console.log('Time to build CSV for Users:', startUser);
+    console.log('Time to build CSV for Restaurants:', startRestaurants);
+    console.log('Time to build CSV for Reviews:', startReviews);
+    console.log('Time to build CSV for Photos:', startPhotos);
+    console.log('Time to build CSV for All:', ((Date.now() - startAll) / 1000 / 60).toFixed(4));
+    })
+  .then(() => {
+    console.log('Comencing Database Seeding with CSV\'s');
+    let queryBin = [];
+    startPhotos = Date.now();
+    for (let i = 0; i < 10; i++) {
+      queryBin.push(db.querySQL(`\copy users(name,location,friends,elite,picture) FROM '${path.resolve(__dirname, 'csv/users.csv')}' DELIMITER ',' CSV HEADER;`, `Users seeded ${i+1}mil`));
+    }
+    return Promise.all(queryBin);
+  })
+  .then(() => {
+    console.log(`Users seeded to Database in ${((Date.now() - startPhotos) / 1000 / 60).toFixed(4)}min`);
+    startRestaurants = Date.now();
+    let queryBin = [];
+    for (let i = 0; i < 10; i++) {
+      queryBin.push(db.querySQL(`\copy restaurants(restname) FROM '${path.resolve(__dirname, 'csv/restaurants.csv')}' DELIMITER ',' CSV HEADER;`, `Restaurants seeded ${i+1}mil`));
+    }
+    return Promise.all(queryBin);
+  })
+  .then(() => {
+    console.log(`Users seeded to Database in ${((Date.now() - startRestaurants) / 1000 / 60).toFixed(4)}min`);
+    startReviews = Date.now();
+    let queryBin = [];
+    for (let i = 0; i < 100; i++) {
+      queryBin.push(db.querySQL(`\copy reviews(date, review, stars) FROM '${path.resolve(__dirname, 'csv/reviews.csv')}' DELIMITER ',' CSV HEADER;`, `Reviews seeded ${i+1}mil`));
+    }
+    return Promise.all(queryBin);
+  })
+  .then(() => {
+    console.log(`Users seeded to Database in ${((Date.now() - startReviews) / 1000 / 60).toFixed(4)}min`);
+    startPhotos = Date.now();
+    let queryBin = [];
+    for (let i = 0; i < 10; i++) {
+      queryBin.push(db.querySQL(`\copy photos(photo, photocaption) FROM '${path.resolve(__dirname, 'csv/photos.csv')}' DELIMITER ',' CSV HEADER;`, `Photos seeded ${i+1}mil`));
+    }
+    return Promise.all(queryBin);
+  }) 
   .then(() => { 
+    console.log(`Users seeded to Database in ${((Date.now() - startPhotos) / 1000 / 60).toFixed(4)}min`);
+    console.log(`Total time for csv and seeding: ${((Date.now() - startAll) / 1000 / 60).toFixed(4)}min`);
+
     pool.end(); })
   .catch((err) => {
     console.log('err', err); });
