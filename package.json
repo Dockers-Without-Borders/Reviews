@@ -14,7 +14,11 @@
   "scripts": {
     "test": "jest --coverage --colors",
     "start": "nodemon ./server/index.js",
-    "seed": "node ./database/seeding.js",
+    "seed:reviews": "node --max-old-space-size=12000 ./database/seed-reviews.js",
+    "seed:users": "node --max-old-space-size=12000 ./database/seed-users.js",
+    "seed:restaurants": "node --max-old-space-size=12000 ./database/seed-restaurants.js",
+    "seed:photos": "node --max-old-space-size=12000 ./database/seed-photos.js",
+    "seed:all": "node --max-old-space-size=12000 ./database/postgres-seeding/seeding.js",
     "build": "webpack -w -d",
     "build:prod": "webpack --mode=production"
   },
@@ -33,6 +37,7 @@
     "babel-jest": "^24.9.0",
     "bluebird": "^3.7.2",
     "css-loader": "^3.2.1",
+    "csv-writer": "^1.5.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.1",
     "jest": "^24.9.0",

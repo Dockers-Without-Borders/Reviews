@@ -6,7 +6,7 @@ CREATE DATABASE yelpreviews;
 
 CREATE TABLE restaurants (
   id SERIAL PRIMARY KEY,
-  restname varchar(50) not null
+  restname varchar(50)
 );
 
 CREATE TABLE users (
@@ -16,8 +16,8 @@ CREATE TABLE users (
   friends smallint default 0,
   elite smallint default 0,
   picture varchar(150) not null,
-  numReviews smallint default 0,
-  numPics smallint default 0
+  numreviews smallint default 0,
+  numpics smallint default 0
 );
 
 CREATE TABLE reviews (
@@ -28,15 +28,18 @@ CREATE TABLE reviews (
   useful smallint default 0,
   funny smallint default 0,
   cool smallint default 0,
+  checkins smallint default 0,
+  responseid int, 
   user_id int,
   restaurant_id int,
   foreign key (user_id) references users(id),
   foreign key (restaurant_id) references restaurants(id)
 );
 
-CREATE TABLE reviewPictures (
+CREATE TABLE photos (
   id SERIAL PRIMARY KEY,
-  links varchar(1200),
-  review_id int not null,
+  review_id int,
+  photo varchar(120),
+  photocaption varchar(50),
   foreign key (review_id) references reviews(id)
-);
+)

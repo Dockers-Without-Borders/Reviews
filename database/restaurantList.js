@@ -93,8 +93,7 @@ const restaurants = [
   'Takoba SF',
   'Fringale',
   'Bota Tapas & Paella Bar',
-  '54 Mint - Ristorante Italiano'
-
+  '54 Mint Ristorante Italiano'
 ];
 
 exports.restaurants = restaurants;
