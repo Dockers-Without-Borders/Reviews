@@ -57,8 +57,6 @@ let db = {
   },
 
   seedUsers: async function () {
-    let count = 0;
-    let query = `INSERT INTO users (name, location, friends, elite, picture) VALUES `;
     const header = [
       {id: 'name', title: 'name'},
       {id: 'location', title: 'location'},
@@ -86,7 +84,6 @@ let db = {
       records.push(user);
     }
     return writeToCsv(header, records, 'users');
-    
   },
 
   seedReviews: async function () {

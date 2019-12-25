@@ -11,6 +11,7 @@ CREATE KEYSPACE IF NOT EXISTS yelpreviews
 CREATE TABLE yelpreviews.restReviews (
   restname varchar,
   reviewtext varchar,
+  date varchar,
   stars int,
   useful int,
   funny int,
@@ -27,7 +28,7 @@ CREATE TABLE yelpreviews.users (
   user_id varchar PRIMARY KEY,
   location varchar,
   friends int,
-  elite boolean,
+  elite int,
   picture varchar,
   numReviews int,
   numPics int
