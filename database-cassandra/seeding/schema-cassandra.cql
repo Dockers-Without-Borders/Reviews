@@ -8,7 +8,8 @@ CREATE KEYSPACE IF NOT EXISTS yelpreviews
     'replication_factor': 3
   };
 
-CREATE TABLE yelpreviews.restReviews (
+CREATE TABLE yelpreviews.restreviews (
+  rest_id int,
   restname varchar,
   reviewtext varchar,
   date varchar,
@@ -21,15 +22,17 @@ CREATE TABLE yelpreviews.restReviews (
   photocaption varchar,
   photo varchar,
   user_id varchar,
-  PRIMARY KEY (restname, user_id)
+  PRIMARY KEY (rest_id, photo)
 );
 
 CREATE TABLE yelpreviews.users (
-  user_id varchar PRIMARY KEY,
+  user_id int,
+  username varchar,
   location varchar,
   friends int,
   elite int,
   picture varchar,
   numReviews int,
-  numPics int
+  numPics int,
+  PRIMARY KEY (user_id)
 );
