@@ -18,7 +18,6 @@ const authProvider = new cassandra.auth.PlainTextAuthProvider('root', 'AKK');
 const contactPoints = ['127.0.0.1:9042'];
 const keyspace = 'yelpreviews';
 const client = new cassandra.Client({contactPoints: contactPoints, authProvider: authProvider, keyspace: keyspace, localDataCenter: 'datacenter1'});
-const { spawn } = require('child_process');
 
 let db = {
   querySQL: function (query, successLog = 'Success') {
@@ -35,7 +34,6 @@ let db = {
       })
     });
   },
-
 
   seedUsers: async function () {
     function writeOneMillionUsers(writer, encoding, callback) {
