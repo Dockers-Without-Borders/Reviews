@@ -31,15 +31,18 @@ CREATE TABLE reviews (
   checkins smallint default 0,
   responseid int, 
   user_id int,
-  restaurant_id int,
-  foreign key (user_id) references users(id),
-  foreign key (restaurant_id) references restaurants(id)
+  restaurant_id int
 );
 
 CREATE TABLE photos (
   id SERIAL PRIMARY KEY,
   review_id int,
   photo varchar(120),
-  photocaption varchar(50),
-  foreign key (review_id) references reviews(id)
-)
+  photocaption varchar(50)
+);
+
+CREATE INDEX idx_restaurant_id ON reviews USING HASH (restaurant_id);
+
+CREATE INDEX idx_restaurant_id ON reviews USING HASH (restaurant_id);
+
+CREATE INDEX idx_review_id on photos USING HASH (review_id);
