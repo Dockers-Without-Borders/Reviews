@@ -16,6 +16,8 @@
     "start": "nodemon ./server/index.js",
     "seed:allPostgres": "node --max-old-space-size=12000 ./database-postgres/seeding/seeding.js",
     "seed:allCassandra": "node --max-old-space-size=12000 ./database-cassandra/seeding/seeding.js",
+    "queryTest:Postgres": "node database-postgres/query/query.js",
+    "queryTest:Cassandra": "node database-cassandra/query/query.js",
     "build": "webpack -w -d",
     "build:prod": "webpack --mode=production"
   },

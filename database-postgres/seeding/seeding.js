@@ -1,12 +1,12 @@
 const faker = require('faker');
 const path = require('path');
-const { Pool, Client } = require('pg');
+const { Pool } = require('pg');
 const restaurantsList = require('../restaurantList.js');
 const photosList = require('../photosList.js');
 const restaurants = restaurantsList.restaurants;
-const maxIntents = 4000;
 const maxphotosPerReview = 3;
 const numUsers = 1000000;
+let userid = 0;
 const numRestaurants = 1000000; // leave equal to num users otherwise might break some function below
 const numReviews = 1000000;
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
@@ -20,11 +20,11 @@ const pool = new Pool({
 
 const writeToCsv = (header, records, filename) => {
   let csvWriter = createCsvWriter({
-    path: `database/postgres-seeding/csv/${filename}.csv`,
+    path: `database-postgres/seeding/csv/${filename}.csv`,
     header: header
   });
   console.log(`Writing ${filename}`);
-  return csvWriter.writeRecords(records)       // returns a promise
+  return csvWriter.writeRecords(records);
 }
 
 let db = {
@@ -62,7 +62,7 @@ let db = {
       {id: 'location', title: 'location'},
       {id: 'friends', title: 'friends'},
       {id: 'elite', title: 'elite'},
-      {id: 'picture', title: 'picture'}
+      {id: 'picture', title: 'picture'},
     ]
     let records = [];
     let firstName, lastInitial, chanceOfElite;
@@ -90,8 +90,9 @@ let db = {
     const header = [
       {id: 'date', title: 'date'},
       {id: 'review', title: 'review'},
-      {id: 'stars', title: 'stars'}
-      //add in user and rest aurant foriegn key ids
+      {id: 'stars', title: 'stars'},
+      {id: 'user_id', title: 'user_id'},
+      {id: 'restaurant_id', title: 'restaurant_id'}
     ]
     let records = [];
     //select random restaurant and user
@@ -100,6 +101,8 @@ let db = {
       review.date = faker.date.recent(1600).toISOString().split('T')[0];
       review.review = faker.lorem.paragraph();
       review.stars = Math.floor(Math.random() * 4) + 1;
+      review.user_id = Math.ceil(Math.random() * numUsers);
+      review.restaurant_id = Math.ceil(Math.random() * numRestaurants);
 
       records.push(review);
     }
@@ -109,7 +112,8 @@ let db = {
   seedPhotos: async function () {
     const header = [
       {id: 'photo', title: 'photo'},
-      {id: 'photocaption', title: 'photocaption'}
+      {id: 'photocaption', title: 'photocaption'},
+      {id: 'review_id', title: 'review_id'}
     ]
     let records = [];
     let numPics;
@@ -117,6 +121,7 @@ let db = {
     for (let i = 0; i < numReviews; i++) {
       let photo = {};
       numPics = Math.ceil(Math.random() * maxphotosPerReview);
+      photo.review_id = Math.ceil(Math.random() * numReviews);
       for (let i = 0; i < numPics; i++) {
         photo.photo = photosList[Math.floor(Math.random() * photosList.length)];
         photo.photocaption = 'DELICIOUS';
@@ -175,25 +180,25 @@ db.seedUsers()
     return Promise.all(queryBin);
   })
   .then(() => {
-    console.log(`Users seeded to Database in ${((Date.now() - startRestaurants) / 1000 / 60).toFixed(4)}min`);
+    console.log(`Restaurants seeded to Database in ${((Date.now() - startRestaurants) / 1000 / 60).toFixed(4)}min`);
     startReviews = Date.now();
     let queryBin = [];
     for (let i = 0; i < 100; i++) {
-      queryBin.push(db.querySQL(`\copy reviews(date, review, stars) FROM '${path.resolve(__dirname, 'csv/reviews.csv')}' DELIMITER ',' CSV HEADER;`, `Reviews seeded ${i+1}mil`));
+      queryBin.push(db.querySQL(`\copy reviews(date, review, stars, user_id, restaurant_id) FROM '${path.resolve(__dirname, 'csv/reviews.csv')}' DELIMITER ',' CSV HEADER;`, `Reviews seeded ${i+1}mil`));
     }
     return Promise.all(queryBin);
   })
   .then(() => {
-    console.log(`Users seeded to Database in ${((Date.now() - startReviews) / 1000 / 60).toFixed(4)}min`);
+    console.log(`Reviews seeded to Database in ${((Date.now() - startReviews) / 1000 / 60).toFixed(4)}min`);
     startPhotos = Date.now();
     let queryBin = [];
     for (let i = 0; i < 10; i++) {
-      queryBin.push(db.querySQL(`\copy photos(photo, photocaption) FROM '${path.resolve(__dirname, 'csv/photos.csv')}' DELIMITER ',' CSV HEADER;`, `Photos seeded ${i+1}mil`));
+      queryBin.push(db.querySQL(`\copy photos(photo, photocaption, review_id) FROM '${path.resolve(__dirname, 'csv/photos.csv')}' DELIMITER ',' CSV HEADER;`, `Photos seeded ${i+1}mil`));
     }
     return Promise.all(queryBin);
   }) 
   .then(() => { 
-    console.log(`Users seeded to Database in ${((Date.now() - startPhotos) / 1000 / 60).toFixed(4)}min`);
+    console.log(`Photos seeded to Database in ${((Date.now() - startPhotos) / 1000 / 60).toFixed(4)}min`);
     console.log(`Total time for csv and seeding: ${((Date.now() - startAll) / 1000 / 60).toFixed(4)}min`);
 
     pool.end(); })
