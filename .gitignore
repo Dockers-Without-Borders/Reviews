@@ -2,3 +2,5 @@ node_modules
 client/dist/bundle.js
 /coverage
 /server/AWS.js
+database-cassandra/seeding/csv
+database-postgres/seeding/csv
