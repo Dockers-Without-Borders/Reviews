@@ -1,0 +1,76 @@
+#
+# Keyspace name and create CQL
+#
+keyspace: yelpreviews
+keyspace_definition: |
+  CREATE KEYSPACE yelpreviews WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': 3 };#
+# Table name and create CQL
+#
+table: restreviews
+table_definition: |
+  CREATE TABLE yelpreviews.restreviews (
+    rest_id       int,
+    restname      varchar,
+    reviewtext    varchar,
+    date          varchar,
+    stars         int,
+    useful        int,
+    funny         int,
+    cool          varchar,
+    checkin       int,
+    response_id   varchar,
+    photocaption  varchar,
+    photo         varchar,
+    user_id       varchar,
+    PRIMARY KEY (rest_id, photo)
+  );
+
+#
+# Meta information for generating data
+#
+columnspec:
+  - name: rest_id
+    size: uniform(1..32) #In chars, no. of chars of UUID
+  - name: restname
+    size: uniform (8..50)
+  - name: reviewtext
+    size: uniform(5..200)
+  - name: date
+    cluster: uniform(15)	
+  - name: stars
+    size: uniform(1..1000)
+  - name: useful
+    size: uniform(1..1000)
+  - name: funny
+    size: uniform(1..1000)
+  - name: cool
+    size: uniform(1..1000)
+  - name: checkin
+    size: uniform(1..10000)
+  - name: response_id
+    size: uniform(1..100M)
+  - name: photo
+    size: uniform(25..100)
+  - name: photocaption
+    size: uniform(0..50)
+  - name: user_id
+    size: uniform(0..10M)
+
+#
+# Specs for insert queries
+#
+insert:
+  partitions: fixed(1)      # 1 partition per batch
+  batchtype: UNLOGGED       # use unlogged batches
+  select: fixed(10)/10      # no chance of skipping a row when generating inserts
+
+#
+# Read queries to run against the schema
+#
+queries:
+   restreview:
+      cql: select * from yelpreviews.restreviews where rest_id = ?
+      fields: samerow             # pick selection values from same row in partition
+  #  user:
+  #     cql: select * from yelpreviews.users where user_id = ?
+  #     fields: samerow             # pick selection values from same row in partition
