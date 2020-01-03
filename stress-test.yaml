@@ -1,0 +1,9 @@
+config:
+  target: 'http://localhost:3003'
+  phases:
+    - duration: 25
+      arrivalRate: 100
+scenarios:
+  - flow:
+    - get:
+        url: "/restaurantReviews/name"

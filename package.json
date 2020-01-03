@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "jest --coverage --colors",
-    "start": "nodemon ./server/index.js",
+    "start": "node ./server/index.js",
     "seed:allPostgres": "node --max-old-space-size=12000 ./database-postgres/seeding/seeding.js",
     "seed:allCassandra": "node --max-old-space-size=12000 ./database-cassandra/seeding/seeding.js",
     "queryTest:Postgres": "node database-postgres/query/query.js",
@@ -62,6 +62,7 @@
     "fs": "0.0.1-security",
     "jest-css-modules": "^2.1.0",
     "mysql": "^2.17.1",
+    "newrelic": "^6.2.0",
     "nodemon": "^2.0.1",
     "path": "^0.12.7",
     "pg": "^7.15.0",

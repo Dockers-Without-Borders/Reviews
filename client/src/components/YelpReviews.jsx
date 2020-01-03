@@ -25,7 +25,7 @@ class YelpReviews extends React.Component {
                 name: "Jimmy L.",
                 numPics: 3,
                 reviews: 1,
-                picture: "https://yelpfoodpics.s3-us-west-1.amazonaws.com/user.jpg",
+                picture: "",
                 }
     }
   }
@@ -38,12 +38,13 @@ class YelpReviews extends React.Component {
 
   async updateReviews() {
     let name = this.state.restName;
+    let rest_id = 551234;
     let sort =  this.state.sort;
-    let url = `/restaurantReviews/${name}&${sort}` ;
+    let url = `/restaurantReviews/${rest_id}` ;
     let data = await axios.get(url)
-    this.setState({
-        reviewsInfo: data.data
-    })
+    // this.setState({
+    //     reviewsInfo: data.data
+    // })
   }
 
   handleSearchInput(search) {
