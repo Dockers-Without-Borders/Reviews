@@ -4,3 +4,4 @@ client/dist/bundle.js
 /server/AWS.js
 database-cassandra/seeding/csv
 database-postgres/seeding/csv
+newrelic_agent.log
