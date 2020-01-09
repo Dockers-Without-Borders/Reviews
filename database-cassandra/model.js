@@ -1,9 +1,9 @@
 const assert = require('assert');
 const cassandra = require('cassandra-driver'); 
-const authProvider = new cassandra.auth.PlainTextAuthProvider('root', 'AKK');
-const contactPoints = ['127.0.0.1:9042'];
+const authProvider = new cassandra.auth.PlainTextAuthProvider('ubuntu', 'ubuntu');
+const contactPoints = ['34.193.113.46:9042'];
 const keyspace = 'yelpreviews';
-const client = new cassandra.Client({contactPoints: contactPoints, authProvider: authProvider, keyspace: keyspace, localDataCenter: 'datacenter1'});
+const client = new cassandra.Client({contactPoints: contactPoints, authProvider: authProvider, keyspace: keyspace, localDataCenter: 'us-east'});
 let restRows = 0;
 let userRows = 0;
 

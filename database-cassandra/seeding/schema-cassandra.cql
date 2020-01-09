@@ -5,7 +5,7 @@ DROP KEYSPACE IF EXISTS yelpreviews;
 CREATE KEYSPACE IF NOT EXISTS yelpreviews
   with replication = {
     'class': 'SimpleStrategy',
-    'replication_factor': 3
+    'replication_factor': 2
   };
 
 CREATE TABLE yelpreviews.restreviews (

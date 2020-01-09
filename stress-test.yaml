@@ -2,8 +2,14 @@ config:
   target: 'http://localhost:3003'
   phases:
     - duration: 60
-      arrivalRate: 30
+      arrivalRate: 2
+      rampTo: 10
+      name: "ramp to peak"
+  http:
+    pool: 20
 scenarios:
   - flow:
-    - get:
-        url: "/restaurantReviews/name"
+    - loop:
+      - get:
+          url: "/restaurantReviews/name"
+      count: 100
