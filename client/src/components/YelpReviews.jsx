@@ -41,9 +41,8 @@ class YelpReviews extends React.Component {
     let name = this.state.restName;
     let rest_id = 551234;
     let sort =  this.state.sort;
-    let url = `/restaurantReviews/${rest_id}` ;
+    let url = `http://52.72.117.110:3003/restaurantReviews/${rest_id}` ;
     let data = await axios.get(url)
-    console.log(data);
     // this.setState({
     //     reviewsInfo: data.data
     // })
