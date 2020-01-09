@@ -12,7 +12,7 @@ app.use(express.static(__dirname + '/../client/dist'));
 
 app.post('/restaurantReviews/:name', function(req, res) {
   let info = {
-    rest_id: 123456,
+    rest_id: Math.ceil(Math.random() * 1000000),
     restname: `Charlie's Choco Facto`,
     reviewText: `This place was so cool`,
     date: 'Jan 25th 2020',
@@ -29,7 +29,7 @@ app.post('/restaurantReviews/:name', function(req, res) {
 });
 
 app.get('/restaurantReviews/:name', function(req, res) {
-  let rest_id = 12345
+  let rest_id = Math.ceil(Math.random() * 1000000);
   db.readReviews(rest_id, function(err, data) {
     if(err) {
       res.status(500).send();
@@ -41,7 +41,7 @@ app.get('/restaurantReviews/:name', function(req, res) {
 
 app.put('/restaurantReviews/:name', function(req, res) {
   let text = `This is the best food I've ever had`;
-  let id = 123456;
+  let id = Math.ceil(Math.random() * 1000000);
   db.updateReviews(text, id, function(err, data) {
     if(err) {
       res.status(500).send();
@@ -53,8 +53,8 @@ app.put('/restaurantReviews/:name', function(req, res) {
 
 app.delete('/restaurantReviews/:name', function(req, res) {
   let text = `This is the best food I've ever had`;
-  let id = 123456;
-  db.deleteReviews(rext, id, function(err, data) {
+  let id = Math.ceil(Math.random() * 1000000);
+  db.deleteReviews(text, id, function(err, data) {
     if(err) {
       res.status(500).send();
     } else {

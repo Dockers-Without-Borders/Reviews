@@ -37,11 +37,13 @@ class YelpReviews extends React.Component {
   }
 
   async updateReviews() {
+    console.log('updating reviews');
     let name = this.state.restName;
     let rest_id = 551234;
     let sort =  this.state.sort;
     let url = `/restaurantReviews/${rest_id}` ;
     let data = await axios.get(url)
+    console.log(data);
     // this.setState({
     //     reviewsInfo: data.data
     // })
